@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sinatra-kube
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sinatra-kube
+  template:
+    metadata:
+      labels:
+        app: sinatra-kube
+    spec:
+      containers:
+        - image: ${YOUR_GCR}:latest
+          imagePullPolicy: Always
+          name: sinatra-kube
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sinatra-kube
+spec:
+  type: LoadBalancer
+  selector:
+    app: sinatra-kube
+  ports:
+    - port: 4567
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-sinatra
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hello-sinatra
+            port:
+              number: 4567
